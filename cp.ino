@@ -10,6 +10,7 @@ int LD;                           //Объявляем вспомогатель�
 #define MOTOR 6
 #define PEZO 13
 #define PIN_POT     A0
+#define FLAME A5
 
 #define CONDITION(x,part) (x>=1024/part)
 
@@ -20,10 +21,11 @@ LiquidCrystal_I2C lcd(0x27,16,2); //Инициализируем дисплей
 void setup() {
  pinMode(LED, OUTPUT);            //Настраиваем PIN LED как выход
  pinMode(MOTOR,OUTPUT);
+ pinMode(FLAME, INPUT);
                                   //Пин с переменным резистором является входом
  pinMode(PIN_POT, INPUT);
  dht.begin();                     //Включаем датчик температуры и влажности
- 
+ Serial.begin(9600);
  lcd.init();                      //Включаем LCD дисплей
  lcd.backlight();
 }
@@ -78,8 +80,15 @@ void fanOFF(){
 }
 
 void loop() {
-   int f = analogRead(FOTO);              //Считываем значение с датчика освещенности
-   LD=light(f);
+   //int f = analogRead(FOTO);              //Считываем значение с датчика освещенности
+   //LD=light(f);
+   int flame = analogRead(FLAME);
+   Serial.println(flame);
+   if(flame>600){
+    /*tone(PEZO, 50, 500);
+    delay(4);
+    buzzOFF();*/
+   }
    delay(100);
    int rotat = analogRead(PIN_POT);
    analogWrite(LED, LD);                  //Устанавливаем значение ШИМ 
