@@ -13,6 +13,7 @@ int LD;                           //Объявляем вспомогатель�
 #define FLAME A5
 #define HIGH_HUM_LED 3
 #define SEC_LED 5
+#define PEZO2 10
 #define CONDITION(x,part) (x>=1024/part)
 
 DHT dht(DHTPIN, DHT11);           //Инициализируем датчик DHT11
@@ -63,6 +64,8 @@ void buzzON(){
   for(int hz = 440; hz < 1000; hz++){
     if(!CONDITION(analogRead(PIN_POT),4)) {buzzOFF();return;}
     tone(PEZO, hz, 50);
+    analogWrite(PEZO2,50);
+    tone(PEZO2, 1440-hz, 50);
     if(hz==1440/2){
       secLedOff();
       ledOn();
@@ -70,6 +73,7 @@ void buzzON(){
     delay(2);
   }
   noTone(PEZO);
+  noTone(PEZO2);
   ledOff();
 secLedOn();
   // Whoop down
@@ -80,14 +84,19 @@ secLedOn();
       ledOn();
     }
     tone(PEZO, hz, 50);
+    tone(PEZO2, 1440-hz, 50);
     delay(2);
   }
   noTone(PEZO);
+  noTone(PEZO2);
   ledOff();
 }
 
 void buzzOFF(){
+  secLedOff();
+  ledOff();
   noTone(PEZO);
+  noTone(PEZO2);
 }
 
 void ledOn(){
