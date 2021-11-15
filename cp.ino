@@ -11,7 +11,8 @@ int LD;                           //Объявляем вспомогатель�
 #define PEZO 13
 #define PIN_POT     A0
 #define FLAME A5
-
+#define HIGH_HUM_LED 3
+#define SEC_LED 5
 #define CONDITION(x,part) (x>=1024/part)
 
 DHT dht(DHTPIN, DHT11);           //Инициализируем датчик DHT11
@@ -30,6 +31,13 @@ void setup() {
  lcd.backlight();
 }
 
+void secLedOn(){
+  analogWrite(SEC_LED, 255);
+}
+
+void secLedOff(){
+  digitalWrite(SEC_LED, LOW);
+}
 
 int light(int svet)               //Функция преобразования 
 {                                 //значения с датчика освещенности 
@@ -51,24 +59,43 @@ int light(int svet)               //Функция преобразования
 
 void buzzON(){
    // Whoop up
+   secLedOn();
   for(int hz = 440; hz < 1000; hz++){
     if(!CONDITION(analogRead(PIN_POT),4)) {buzzOFF();return;}
     tone(PEZO, hz, 50);
+    if(hz==1440/2){
+      secLedOff();
+      ledOn();
+    }
     delay(2);
   }
   noTone(PEZO);
-
+  ledOff();
+secLedOn();
   // Whoop down
   for(int hz = 1000; hz > 440; hz--){
     if(!CONDITION(analogRead(PIN_POT),4)) {buzzOFF();return;}
+    if(hz==1440/2){
+      secLedOff();
+      ledOn();
+    }
     tone(PEZO, hz, 50);
     delay(2);
   }
   noTone(PEZO);
+  ledOff();
 }
 
 void buzzOFF(){
   noTone(PEZO);
+}
+
+void ledOn(){
+  digitalWrite(LED, HIGH);
+}
+
+void ledOff(){
+    digitalWrite(LED, LOW);
 }
 
 void fanON(){
@@ -94,10 +121,17 @@ void loop() {
    analogWrite(LED, LD);                  //Устанавливаем значение ШИМ 
    float h=dht.readHumidity();            //Считываем значение влажности
    float t=dht.readTemperature();         //Считываем значение температуры
+    if(h>=70.00){
+    analogWrite(HIGH_HUM_LED, 255);
+   }
+   else{
+    digitalWrite(HIGH_HUM_LED, LOW);
+   }
+   
     if(t>=24.0){
       if(CONDITION(rotat,4)){
       fanON();
-      buzzON();  
+      buzzON();
       }
       else{
         fanOFF();
